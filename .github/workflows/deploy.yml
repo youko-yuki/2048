@@ -1,0 +1,51 @@
+# 用 GitHub Actions 把仓库根目录发布到 GitHub Pages。
+#
+# 注意：这与「Settings ▸ Pages ▸ Source = Deploy from a branch」二选一。
+#   - 用本工作流：Pages ▸ Source 必须选 "GitHub Actions"。
+#   - 用分支发布：删掉本文件（或不要启用 Pages 的 Actions 源），零配置即可。
+#
+# 本项目零构建，工作流只是把现有文件原样上传，不做任何打包。
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run logic tests
+        run: node --test
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          # 首次运行时自动把 Pages 的 Source 切成 GitHub Actions，省掉手动点设置
+          enablement: true
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

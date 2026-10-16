@@ -1,0 +1,14 @@
+{
+  "name": "game-2048",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "零依赖、零构建的 2048，可直接部署到 GitHub Pages",
+  "scripts": {
+    "dev": "node tools/serve.mjs",
+    "serve": "node tools/serve.mjs",
+    "test": "node --test"
+  },
+  "keywords": ["2048", "game", "vanilla", "github-pages"],
+  "license": "MIT"
+}

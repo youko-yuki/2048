@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2048 · 合并方块小游戏</title>
+<meta name="description" content="一个零依赖、零构建的 2048 小游戏：方向键 / WASD / 手指滑动操作，支持撤销、最高分记录与深浅色主题。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#faf8ef">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<script>
+  // 在样式表之前定好主题，避免首屏闪白
+  (function () {
+    var theme = 'light';
+    try {
+      var stored = localStorage.getItem('game2048.theme');
+      if (stored === 'dark' || stored === 'light') {
+        theme = stored;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        theme = 'dark';
+      }
+    } catch (error) {
+      theme = 'light';
+    }
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="head">
+    <div>
+      <h1>2048</h1>
+      <p class="sub">合并方块，凑出 2048</p>
+    </div>
+    <button id="theme" class="icon-btn" type="button" aria-label="切换到深色模式">
+      <svg class="icon icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="4.4"></circle>
+        <path d="M12 2.4v2.3M12 19.3v2.3M2.4 12h2.3M19.3 12h2.3M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7"></path>
+      </svg>
+      <svg class="icon icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11Z"></path>
+      </svg>
+    </button>
+  </header>
+
+  <div class="hud">
+    <div class="score-box">
+      <span class="score-label">分数</span>
+      <strong id="score">0</strong>
+    </div>
+    <div class="score-box">
+      <span class="score-label">最高</span>
+      <strong id="best">0</strong>
+    </div>
+    <div class="actions">
+      <button id="new-game" class="btn" type="button">新游戏</button>
+      <button id="undo" class="btn ghost" type="button" disabled>撤销</button>
+    </div>
+  </div>
+
+  <div id="board" class="board" role="application" aria-label="2048 棋盘，可用方向键或手指滑动操作">
+    <div id="grid" class="grid" aria-hidden="true"></div>
+    <div id="tiles" class="tiles" aria-hidden="true"></div>
+    <div id="overlay" class="overlay" hidden>
+      <div class="overlay-card">
+        <h2 id="overlay-title">游戏结束</h2>
+        <p id="overlay-text"></p>
+        <div id="overlay-actions" class="overlay-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">
+    方向键 / <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 手指滑动 · <kbd>Z</kbd> 撤销 · <kbd>R</kbd> 重开
+  </p>
+  <p id="boot-hint" class="boot-hint" hidden>
+    棋盘没能初始化：脚本没有加载。<br>
+    浏览器不允许用 <code>file://</code> 双击打开 ES 模块页面，请在项目目录执行
+    <code>node tools/serve.mjs</code>，然后访问 <code>http://127.0.0.1:8080/</code>。
+  </p>
+  <p id="live" class="sr-only" aria-live="polite"></p>
+</main>
+<script type="module" src="./js/main.js"></script>
+<script>
+  // 兜底提示：模块被拦截（file:// 最常见）时，别让页面只是「空棋盘」让人猜
+  (function () {
+    var hint = document.getElementById('boot-hint');
+    if (!hint) return;
+    var ticks = 0;
+    var timer = setInterval(function () {
+      ticks += 1;
+      if (document.querySelector('#grid > *')) {
+        hint.hidden = true;
+        clearInterval(timer);
+        return;
+      }
+      if (ticks >= 6) hint.hidden = false; // 约 1.8s 后仍未渲染才提示
+      if (ticks >= 200) clearInterval(timer);
+    }, 300);
+  })();
+</script>
+</body>
+</html>
